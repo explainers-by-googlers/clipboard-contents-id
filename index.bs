@@ -5,8 +5,8 @@ Level: None
 Status: w3c/UD
 Repository: explainers-by-googlers/todo-your-repo-name
 URL: https://explainers-by-googlers.github.io/todo-your-repo-name
-Editor: TODO: Your Name, Google https://google.com, TODO@google.com
-Abstract: TODO: A short description of your spec, one or two sentences.
+Editor: Luke Klimek, Google https://google.com, zgroza@google.com
+Abstract: An API for getting a unique ID of current clipboard contents.
 Markup Shorthands: markdown yes, css no
 Complain About: accidental-2119 yes, missing-example-ids yes
 Assume Explicit For: yes
