@@ -15,7 +15,7 @@ This proposal is an early design sketch by ChromeOS team to describe the problem
 
 - [Introduction](#introduction)
   - [Why a new thing, aren’t other clipboard APIs enough?](#why-a-new-thing-arent-other-clipboard-apis-enough)
-  - [What is the optimal solution then?](#what-is-the-optimal-solution-then?)
+  - [What is the optimal solution then?](#what-is-the-optimal-solution-then)
 - [Goals](#goals)
 - [Non-goals](#non-goals)
 - [Token stability across tabs or app windows](#token-stability-across-tabs-or-app-windows)
