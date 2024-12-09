@@ -98,7 +98,7 @@ async function onRemoteClipboardChanged(remoteClipboardItems) {
 Then, all that remains is to call `onRemoteClipboardChanged` every time the clipboard changes remotely \- and provided that no changes occur locally while the window is in focus (which is usually the case, as clipboard changes mostly occur due to user actions \- especially in case of local clipboard and VDI), clipboard synchronization will look seamless.
 In the unfortunate case of anticipated local changes to the clipboard done in the background, this can be improved in two ways:
 
-* Regular polling of the token and invoking a similar handler to the `focus` [handler](?tab=t.0#bookmark=id.vsbj524ib3z1) in the snippet above: this is generally not the best solution, but this API should be lightweight enough that it doesn’t create much overhead.
+* Regular polling of the token and invoking a similar handler to the `focus` handler in the snippet above: this is generally not the best solution, but this API should be lightweight enough that it doesn’t create much overhead.
 * Integrating this with `clipboardchange` event in addition (or instead) or the `focus` event: this depends on whether `clipboardchange` event becomes a part of the web standard.
 
 Both however would require some synchronization of the handler and `onRemoteClipboardChanged` to prevent handlers getting between `write` and `contentsID`.
