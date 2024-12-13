@@ -31,7 +31,7 @@ This proposal is an early design sketch by ChromeOS team to describe the problem
 ### Why a new thing, aren’t other clipboard APIs enough?
 
 In short, without this there's no efficient way to detect clipboard changes.
-To elaborate, let's consider a common use case: Virtual Desktop Infrastructure (VDI). Many Clipboard API use cases within VDI environments center around synchronizing the local clipboard with a remote machine, so that:
+To elaborate, let's consider a common use case: Virtual Desktop Infrastructure (VDI). While connecting through remote desktop solutions, users expect the experience between computers to be seamless, which includes the clipboard. Many Clipboard API use cases within VDI environments center around synchronizing the local clipboard with a remote machine, so that:
 
 1. When a user copies something locally outside the VDI app and then switches to it, the new clipboard contents are seamlessly available in the remote session.
 2. When a user copies something on the remote machine and switches away from the VDI app, they can paste the copied content locally.
@@ -45,7 +45,7 @@ Neither of these approaches is optimal (especially with large clipboard contents
 
 ### What is the optimal solution then?
 
-Several platforms (ex. [MacOS](https://developer.apple.com/documentation/uikit/uipasteboard/1622103-changecount?language=objc), [Windows](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-addclipboardformatlistener), [X11](https://source.chromium.org/chromium/chromium/src/+/main:ui/base/x/x11_clipboard_helper.cc;drc=d815f515138991af2aa5b1d07c64906fd8a7366b;bpv=1;bpt=1;l=68?gsn=SelectionChangeObserver&gs=KYTHE%3A%2F%2Fkythe%3A%2F%2Fchromium.googlesource.com%2Fcodesearch%2Fchromium%2Fsrc%2F%2Fmain%3Flang%3Dc%252B%252B%3Fpath%3Dui%2Fbase%2Fx%2Fx11_clipboard_helper.cc%238ndnC55hoYsX0PuoXruTyg4VFTFux3LU_qg9KPKIcTE) and [Wayland](https://source.chromium.org/chromium/chromium/src/+/main:ui/ozone/platform/wayland/host/wayland_data_device.cc;drc=d815f515138991af2aa5b1d07c64906fd8a7366b;bpv=1;bpt=1;l=182?gsn=OnSelection&gs=KYTHE%3A%2F%2Fkythe%3A%2F%2Fchromium.googlesource.com%2Fcodesearch%2Fchromium%2Fsrc%2F%2Fmain%3Flang%3Dc%252B%252B%3Fpath%3Dui%2Fozone%2Fplatform%2Fwayland%2Fhost%2Fwayland_data_device.cc%23KBIABXwYhD42mocIlezMjghFMtoChm0IKDja7p09J9o), [Android](https://developer.android.com/reference/android/content/ClipboardManager.OnPrimaryClipChangedListener)) offer efficient ways to track clipboard content changes without directly reading the data. This is often achieved through clipboard sequence numbers or change notifications. The `navigator.clipboard.contentsID()` API aims to leverage these capabilities. It allows websites to request a numeric token (a 128-bit integer) representing the current clipboard state. If this token differs from a previously retrieved one, it indicates that the clipboard contents have changed between the two calls. Importantly, this operation has a constant time complexity (O(1)), independent of the clipboard's size. Therefore, even frequent checks (e.g., on window refocus) remain efficient, even when dealing with large amounts of copied data.
+Several platforms (ex. [MacOS](https://developer.apple.com/documentation/uikit/uipasteboard/1622103-changecount?language=objc), [Windows](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-addclipboardformatlistener), [X11](https://source.chromium.org/chromium/chromium/src/+/main:ui/base/x/x11_clipboard_helper.cc;drc=d815f515138991af2aa5b1d07c64906fd8a7366b;bpv=1;bpt=1;l=68?gsn=SelectionChangeObserver&gs=KYTHE%3A%2F%2Fkythe%3A%2F%2Fchromium.googlesource.com%2Fcodesearch%2Fchromium%2Fsrc%2F%2Fmain%3Flang%3Dc%252B%252B%3Fpath%3Dui%2Fbase%2Fx%2Fx11_clipboard_helper.cc%238ndnC55hoYsX0PuoXruTyg4VFTFux3LU_qg9KPKIcTE) and [Wayland](https://source.chromium.org/chromium/chromium/src/+/main:ui/ozone/platform/wayland/host/wayland_data_device.cc;drc=d815f515138991af2aa5b1d07c64906fd8a7366b;bpv=1;bpt=1;l=182?gsn=OnSelection&gs=KYTHE%3A%2F%2Fkythe%3A%2F%2Fchromium.googlesource.com%2Fcodesearch%2Fchromium%2Fsrc%2F%2Fmain%3Flang%3Dc%252B%252B%3Fpath%3Dui%2Fozone%2Fplatform%2Fwayland%2Fhost%2Fwayland_data_device.cc%23KBIABXwYhD42mocIlezMjghFMtoChm0IKDja7p09J9o), [Android](https://developer.android.com/reference/android/content/ClipboardManager.OnPrimaryClipChangedListener) and [iOS](http://go/appledoc/uikit/uipasteboard/changecount)) offer efficient ways to track clipboard content changes without directly reading the data. This is often achieved through clipboard sequence numbers or change notifications. The `navigator.clipboard.contentsID()` API aims to leverage these capabilities. It allows websites to request a numeric token (a 128-bit integer) representing the current clipboard state. If this token differs from a previously retrieved one, it indicates that the clipboard contents have changed between the two calls. Importantly, this operation has a constant time complexity (O(1)), independent of the clipboard's size. Therefore, even frequent checks (e.g., on window refocus) remain efficient, even when dealing with large amounts of copied data.
 
 ## Goals
 
@@ -99,13 +99,13 @@ Then, all that remains is to call `onRemoteClipboardChanged` every time the clip
 In the unfortunate case of anticipated local changes to the clipboard done in the background, this can be improved in two ways:
 
 * Regular polling of the token and invoking a similar handler to the `focus` handler in the snippet above: this is generally not the best solution, but this API should be lightweight enough that it doesn’t create much overhead.
-* Integrating this with `clipboardchange` event in addition (or instead) or the `focus` event: this depends on whether `clipboardchange` event becomes a part of the web standard.
+* Integrating this with `clipboardchange` event in addition (or instead) or the `focus` event: this depends on whether `clipboardchange` event becomes a part of the web standard and requires to somehow ignore the listener call between `write` and `contentsID`.
 
 Both however would require some synchronization of the handler and `onRemoteClipboardChanged` to prevent handlers getting between `write` and `contentsID`.
 
 **Note:** In any case, this will be in some degree prone to inherent race conditions due to lack of clipboard atomic operations \- which will show themselves mostly in case of user switching apps very rapidly. This API exists in order to enable heuristics to make this invisible in most cases, but will not fix it completely.
 
-## Security considerations
+## Security & Privacy considerations
 
 This should be under the same restrictions as the `navigator.clipboard.read()`:
 
@@ -146,4 +146,5 @@ Many thanks for valuable feedback and advice from:
 - [Andrew Rayskiy](mailto:greengrape@google.com)
 - [Ayu Ishii](mailto:ayui@chromium.org)
 - [Dominik Bylica](mailto:bylica@google.com)
+- [Jeffrey Yasskin](jyasskin@google.com)
 - [Robert Ferens](mailto:rferens@google.com)
