@@ -31,7 +31,7 @@ This proposal is an early design sketch by ChromeOS team to describe the problem
 ### Why a new thing, aren’t other clipboard APIs enough?
 
 In short, without this there's no efficient way to detect clipboard changes.
-To elaborate, let's consider a common use case: Virtual Desktop Infrastructure (VDI). While connecting through remote desktop solutions, users expect the experience between computers to be seamless, which includes the clipboard. Many Clipboard API use cases within VDI environments center around synchronizing the local clipboard with a remote machine, so that:
+To elaborate, let's consider a common use case: Virtual Desktop Infrastructure (VDI). While connecting to a remote desktop using a web browser, users expect the experience between computers to be seamless. Some native applications on the remote side react to clipboard changes before the user explicitly pastes the data, so users are surprised when they copy something locally and the remote side doesn't react (for example, native paste button on the remote side is greyed out or yields stale content). Many Clipboard API use cases within VDI environments center around synchronizing the local clipboard with a remote machine, so that:
 
 1. When a user copies something locally outside the VDI app and then switches to it, the new clipboard contents are seamlessly available in the remote session.
 2. When a user copies something on the remote machine and switches away from the VDI app, they can paste the copied content locally.
