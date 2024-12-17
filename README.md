@@ -99,7 +99,7 @@ Then, all that remains is to call `onRemoteClipboardChanged` every time the clip
 In the unfortunate case of anticipated local changes to the clipboard done in the background, this can be improved in two ways:
 
 * Regular polling of the token and invoking a similar handler to the `focus` handler in the snippet above: this is generally not the best solution, but this API should be lightweight enough that it doesn’t create much overhead.
-* Integrating this with `clipboardchange` event in addition (or instead) or the `focus` event: this depends on whether `clipboardchange` event becomes a part of the web standard and requires to somehow ignore the listener call between `write` and `contentsID`.
+* Integrating this with `clipboardchange` event in addition (or instead) or the `focus` event: this depends on whether `clipboardchange` event becomes a part of the web standard. This API's design - or the particular implementation - will need to be integrated with the `clipboardchange` design to ensure it isn't delivered between writing to the clipboard and updating the last-known token value.
 
 Both however would require some synchronization of the handler and `onRemoteClipboardChanged` to prevent handlers getting between `write` and `contentsID`.
 
