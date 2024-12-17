@@ -21,7 +21,7 @@ proposed solution. It has not been approved to ship in Chrome.
 - [Non-goals](#non-goals)
 - [Token stability across tabs or app windows](#token-stability-across-tabs-or-app-windows)
 - [How to use it?](#how-to-use-it)
-- [Security considerations](#security-considerations)
+- [Security & Privacy considerations](#security--privacy-considerations)
 - [Alternatives](#alternatives)
   - [Functionality itself](#functionality-itself)
   - [Format of the token](#format-of-the-token)
