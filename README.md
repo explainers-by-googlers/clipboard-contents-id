@@ -146,5 +146,5 @@ Many thanks for valuable feedback and advice from:
 - [Andrew Rayskiy](mailto:greengrape@google.com)
 - [Ayu Ishii](mailto:ayui@chromium.org)
 - [Dominik Bylica](mailto:bylica@google.com)
-- [Jeffrey Yasskin](jyasskin@google.com)
+- [Jeffrey Yasskin](mailto:jyasskin@google.com)
 - [Robert Ferens](mailto:rferens@google.com)
