@@ -62,8 +62,9 @@ Several platforms (ex.
 [X11](https://source.chromium.org/chromium/chromium/src/+/main:ui/base/x/x11_clipboard_helper.cc;drc=d815f515138991af2aa5b1d07c64906fd8a7366b;bpv=1;bpt=1;l=68?gsn=SelectionChangeObserver&gs=KYTHE%3A%2F%2Fkythe%3A%2F%2Fchromium.googlesource.com%2Fcodesearch%2Fchromium%2Fsrc%2F%2Fmain%3Flang%3Dc%252B%252B%3Fpath%3Dui%2Fbase%2Fx%2Fx11_clipboard_helper.cc%238ndnC55hoYsX0PuoXruTyg4VFTFux3LU_qg9KPKIcTE)
 and
 [Wayland](https://source.chromium.org/chromium/chromium/src/+/main:ui/ozone/platform/wayland/host/wayland_data_device.cc;drc=d815f515138991af2aa5b1d07c64906fd8a7366b;bpv=1;bpt=1;l=182?gsn=OnSelection&gs=KYTHE%3A%2F%2Fkythe%3A%2F%2Fchromium.googlesource.com%2Fcodesearch%2Fchromium%2Fsrc%2F%2Fmain%3Flang%3Dc%252B%252B%3Fpath%3Dui%2Fozone%2Fplatform%2Fwayland%2Fhost%2Fwayland_data_device.cc%23KBIABXwYhD42mocIlezMjghFMtoChm0IKDja7p09J9o),
+[ChromeOS](https://source.chromium.org/chromium/chromium/src/+/main:ui/base/clipboard/clipboard_non_backed.cc;drc=65c747e508657f16ca3d0905ab1e11115f5a5ff1;l=286),
 [Android](https://developer.android.com/reference/android/content/ClipboardManager.OnPrimaryClipChangedListener) and
-[iOS](http://go/appledoc/uikit/uipasteboard/changecount)) offer efficient ways to track clipboard content changes
+[iOS](https://developer.apple.com/documentation/uikit/uipasteboard/changecount)) offer efficient ways to track clipboard content changes
 without directly reading the data. This is often achieved through clipboard sequence numbers or change notifications.
 The `navigator.clipboard.contentsID()` API aims to leverage these capabilities. It allows websites to request a numeric
 token (a 128-bit integer) representing the current clipboard state. If this token differs from a previously retrieved
