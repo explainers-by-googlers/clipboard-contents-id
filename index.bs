@@ -3,7 +3,7 @@ Title: The TODO API
 Shortname: todo
 Level: None
 Status: w3c/UD
-Repository: explainers-by-googlers/todo-your-repo-name
+Repository: explainers-by-googlers/clipboard-contents-id
 URL: https://explainers-by-googlers.github.io/todo-your-repo-name
 Editor: Luke Klimek, Google https://google.com, zgroza@google.com
 Abstract: An API for getting a unique ID of current clipboard contents.
@@ -20,7 +20,7 @@ Include Can I Use Panels: yes
 Introduction {#intro}
 =====================
 
-For now, see the [explainer]([REPOSITORYURL]).
+For now, see the [explainer](https://github.com/explainers-by-googlers/clipboard-contents-id).
 
 See [https://garykac.github.io/procspec/](https://garykac.github.io/procspec/),
 [https://dlaliberte.github.io/bikeshed-intro/index.html](https://dlaliberte.github.io/bikeshed-intro/index.html),

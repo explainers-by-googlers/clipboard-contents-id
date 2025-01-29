@@ -1,7 +1,7 @@
 This proposal is an early design sketch by ChromeOS team to describe the problem below and solicit feedback on the
 proposed solution. It has not been approved to ship in Chrome.
 
-# Explainer: `navigator.clipboard.contentsID()`
+# Explainer: `navigator.clipboard.contentsId()`
 
 ## Authors:
 
@@ -44,7 +44,7 @@ so that:
 2. When a user copies something on the remote machine and switches away from the VDI app, they can paste the copied
    content locally.
 
-Without `contentsID()`, there are two primary ways to achieve the first scenario:
+Without `contentsId()`, there are two primary ways to achieve the first scenario:
 
 - Upon refocusing the VDI app, automatically send the content from the local clipboard to the remote machine.
 - Upon refocusing the VDI app, read the clipboard contents, compare them with the last known state, and send to the
@@ -66,7 +66,7 @@ and
 [Android](https://developer.android.com/reference/android/content/ClipboardManager.OnPrimaryClipChangedListener) and
 [iOS](https://developer.apple.com/documentation/uikit/uipasteboard/changecount)) offer efficient ways to track clipboard content changes
 without directly reading the data. This is often achieved through clipboard sequence numbers or change notifications.
-The `navigator.clipboard.contentsID()` API aims to leverage these capabilities. It allows websites to request a numeric
+The `navigator.clipboard.contentsId()` API aims to leverage these capabilities. It allows websites to request a numeric
 token (a 128-bit integer) representing the current clipboard state. If this token differs from a previously retrieved
 one, it indicates that the clipboard contents have changed between the two calls. Importantly, this operation has a
 constant time complexity (O(1)), independent of the clipboard's size. Therefore, even frequent checks (e.g., on window
@@ -88,14 +88,14 @@ refocus) remain efficient, even when dealing with large amounts of copied data.
 
 One of the goals of this API is to enable cross-app synchronization of clipboard \- so this should be as close to the
 stability of the clipboard itself as possible. So, every site under the same browser process should get the same token
-from calling `contentsID()`.
+from calling `contentsId()`.
 
 ## How to use it?
 
 Frankly, quite straightforwardly. Signature of the method will look somewhat like this:
 
 ```javascript
-Promise < BigInt > contentsID();
+Promise < BigInt > contentsId();
 ```
 
 So in the mentioned VDI case, the code could look somewhat like this:
@@ -106,7 +106,7 @@ var lastToken = null;
 // Handler called on every window refocus.
 // It checks if it's necessary to sync clipboard contents to remote.
 window.addEventListener("focus", () => {
-  navigator.clipboard.contentsID().then((token) => {
+  navigator.clipboard.contentsId().then((token) => {
     if (token !== lastToken) {
       // Clipboard contents have changed!
       // Send to remote machine
@@ -118,7 +118,7 @@ window.addEventListener("focus", () => {
 // Function that is called by the client app when user copies something on remote.
 async function onRemoteClipboardChanged(remoteClipboardItems) {
   await navigator.clipboard.write(remoteClipboardItems);
-  lastToken = await navigator.clipboard.contentsID();
+  lastToken = await navigator.clipboard.contentsId();
 }
 ```
 
@@ -136,7 +136,7 @@ ways:
   clipboard and updating the last-known token value.
 
 Both however would require some synchronization of the handler and `onRemoteClipboardChanged` to prevent handlers
-getting between `write` and `contentsID`.
+getting between `write` and `contentsId`.
 
 **Note:** In any case, this will be in some degree prone to inherent race conditions due to lack of clipboard atomic
 operations \- which will show themselves mostly in case of user switching apps very rapidly. This API exists in order to
@@ -165,7 +165,7 @@ and standardized, it operates differently. Instead of determining if a change ha
 it provides real-time notifications for every change, without detailed information about the cause. Therefore, if your
 app also writes to the clipboard, it can be challenging to determine whether you or another source caused the change
 (especially with multiple windows/tabs of the same app open), potentially leading to unnecessary data transfers or
-having to implement comparison anyway. In case of `contentsID()`, you can save the new token just after writing \- and
+having to implement comparison anyway. In case of `contentsId()`, you can save the new token just after writing \- and
 it will be irrelevant for all active tabs/windows irrelevant what caused the change, only that this change is already in
 sync with the remote and no action is needed.
 
@@ -177,7 +177,7 @@ There are several ways in which the token could look like, including:
 2. Timestamp of the last change (or call that detected it)
 3. Hash of the clipboard contents
 4. Random 128-bit number without any specified scheme or significance \- other than “after something is written to the
-   clipboard, `contentsID()` should yield a different value than it did before the write”
+   clipboard, `contentsId()` should yield a different value than it did before the write”
 
 Preferred approach is 4, for the following reasons:
 
