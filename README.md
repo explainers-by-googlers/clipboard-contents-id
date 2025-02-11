@@ -79,7 +79,8 @@ notifications. The `navigator.clipboard.contentsId()` API aims to leverage these
 request a numeric token (a 128-bit integer) representing the current clipboard state. If this token differs from a
 previously retrieved one, it indicates that the clipboard contents have changed between the two calls. Importantly, this
 operation has a constant time complexity (O(1)), independent of the clipboard's size. Therefore, even frequent checks
-(e.g., on window refocus) remain efficient, even when dealing with large amounts of copied data.
+(e.g., pasting quickly many times in an online document editor or checking on every refocus whether to show "synchronize
+clipboard" button) remain efficient, even when dealing with large amounts of copied data.
 
 This could help greatly in making web VDI clients work smoothly in browsers that base clipboard access on user
 activation - as the site could without activation check _whether_ the clipboard has changed and only then display a
