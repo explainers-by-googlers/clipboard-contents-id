@@ -57,7 +57,7 @@ challenges related to sanitization and encoding make it difficult to directly co
 byte-by-byte with previously received data.
 
 Moreover, only the first option is viable in browsers that do not implement persistent clipboard permissions. There, the
-user would have to consciuously remember to click on a button every time they have before copied something - which is
+user would have to consciously remember to click on a button every time they have before copied something - which is
 problematic, as the system clipboard is a tool that most people use intuitively and intensively. A good example of this
 challenge could be [Cameyo](https://cameyo.com/), which essentially streams individual applications from the remote
 servers as Progressive Web Apps. Alt-tabbing from one like-native application to another and having to remember whether
