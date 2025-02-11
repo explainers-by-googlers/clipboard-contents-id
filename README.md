@@ -106,7 +106,8 @@ calls (as they prompt user to make additional action) and call it only if the cl
 
 One of the goals of this API is to enable cross-tab synchronization of clipboard on the scope of one origin \- so this
 should be as close to the stability of the clipboard itself as possible without providing cross-site fingerprinting
-surface. So, every tab of the same origin under the same browser process should get the same token from calling
+surface. So, every tab of the same origin under the same
+[partition](https://w3ctag.github.io/privacy-principles/#dfn-partition) should get the same token from calling
 `contentsId()`.
 
 ## How to use it?
@@ -168,8 +169,6 @@ This in of itself does not provide the website with any new substantial informat
 danger is a new fingerprinting surface. To remediate this:
 
 - This should be available only when the document is in focus (same as `navigator.clipboard.read()`).
-- For user agents implementing persistent clipboard permissions, it might make sense to put this behind `clipboard-read`
-  permission - as there should be no application of this that won't require calling `read()` sometime later.
 - The ID returned by this should be unique to the origin calling the method and change every time the site data for it
   is deleted.
 
