@@ -44,15 +44,24 @@ so that:
 2. When a user copies something on the remote machine and switches away from the VDI app, they can paste the copied
    content locally.
 
-Without `contentsId()`, there are two primary ways to achieve the first scenario:
+Without `contentsId()`, there are three primary ways to achieve the first scenario:
 
+- Expose an additional "synchronize clipboard" button to the user - which, on click, would send the current clipboard to
+  the remote machine.
 - Upon refocusing the VDI app, automatically send the content from the local clipboard to the remote machine.
 - Upon refocusing the VDI app, read the clipboard contents, compare them with the last known state, and send to the
   remote machine only if they have changed.
 
-Neither of these approaches is optimal (especially with large clipboard contents), and additional challenges related to
-sanitization and encoding make it difficult to directly compare the clipboard contents byte-by-byte with previously
-received data.
+Neither of these approaches is both optimal (especially with large clipboard contents) and user-friendly, and additional
+challenges related to sanitization and encoding make it difficult to directly compare the clipboard contents
+byte-by-byte with previously received data.
+
+Moreover, only the first option is viable in browsers that do not implement persistent clipboard permissions. There, the
+user would have to consciously remember to click on a button every time they have before copied something - which is
+problematic, as the system clipboard is a tool that most people use intuitively and intensively. A good example of this
+challenge could be [Cameyo](https://cameyo.com/), which essentially streams individual applications from the remote
+servers as Progressive Web Apps. Alt-tabbing from one like-native application to another and having to remember whether
+you have copied anything or not significantly degrades user experience.
 
 ### What is the optimal solution then?
 
@@ -64,13 +73,23 @@ and
 [Wayland](https://source.chromium.org/chromium/chromium/src/+/main:ui/ozone/platform/wayland/host/wayland_data_device.cc;drc=d815f515138991af2aa5b1d07c64906fd8a7366b;bpv=1;bpt=1;l=182?gsn=OnSelection&gs=KYTHE%3A%2F%2Fkythe%3A%2F%2Fchromium.googlesource.com%2Fcodesearch%2Fchromium%2Fsrc%2F%2Fmain%3Flang%3Dc%252B%252B%3Fpath%3Dui%2Fozone%2Fplatform%2Fwayland%2Fhost%2Fwayland_data_device.cc%23KBIABXwYhD42mocIlezMjghFMtoChm0IKDja7p09J9o),
 [ChromeOS](https://source.chromium.org/chromium/chromium/src/+/main:ui/base/clipboard/clipboard_non_backed.cc;drc=65c747e508657f16ca3d0905ab1e11115f5a5ff1;l=286),
 [Android](https://developer.android.com/reference/android/content/ClipboardManager.OnPrimaryClipChangedListener) and
-[iOS](https://developer.apple.com/documentation/uikit/uipasteboard/changecount)) offer efficient ways to track clipboard content changes
-without directly reading the data. This is often achieved through clipboard sequence numbers or change notifications.
-The `navigator.clipboard.contentsId()` API aims to leverage these capabilities. It allows websites to request a numeric
-token (a 128-bit integer) representing the current clipboard state. If this token differs from a previously retrieved
-one, it indicates that the clipboard contents have changed between the two calls. Importantly, this operation has a
-constant time complexity (O(1)), independent of the clipboard's size. Therefore, even frequent checks (e.g., on window
-refocus) remain efficient, even when dealing with large amounts of copied data.
+[iOS](https://developer.apple.com/documentation/uikit/uipasteboard/changecount)) offer efficient ways to track clipboard
+content changes without directly reading the data. This is often achieved through clipboard sequence numbers or change
+notifications. The `navigator.clipboard.contentsId()` API aims to leverage these capabilities. It allows websites to
+request a numeric token (a 128-bit integer) representing the current clipboard state. If this token differs from a
+previously retrieved one, it indicates that the clipboard contents have changed between the two calls. Importantly, this
+operation has a constant time complexity (O(1)), independent of the clipboard's size. Therefore, even frequent checks
+(e.g., pasting quickly many times in an online document editor or checking on every refocus whether to show "synchronize
+clipboard" button) remain efficient, even when dealing with large amounts of copied data.
+
+This could help greatly in making web VDI clients work smoothly in browsers that base clipboard access on user
+activation - as the site could without activation check _whether_ the clipboard has changed and only then display a
+"click ctrl+v to synchronize clipboard" notification or a "click here to synchronize clipboard" button, taking the
+burden of tracking this from the user while still not having too much access to the clipboard.
+
+Moreover, above approach at enabling apps to work better without broad persistent clipboard permissions could be
+extended to a lot more applications, for example online editors, that could using this minize the number of `read()`
+calls (as they prompt user to make additional action) and call it only if the clipboard has changed from the last time.
 
 ## Goals
 
@@ -86,9 +105,11 @@ refocus) remain efficient, even when dealing with large amounts of copied data.
 
 ## Token stability across tabs or app windows
 
-One of the goals of this API is to enable cross-app synchronization of clipboard \- so this should be as close to the
-stability of the clipboard itself as possible. So, every site under the same browser process should get the same token
-from calling `contentsId()`.
+One of the goals of this API is to enable cross-tab synchronization of clipboard on the scope of one origin \- so this
+should be as close to the stability of the clipboard itself as possible without providing cross-site fingerprinting
+surface. So, every tab of the same origin under the same
+[partition](https://w3ctag.github.io/privacy-principles/#dfn-partition) should get the same token from calling
+`contentsId()`.
 
 ## How to use it?
 
@@ -109,7 +130,8 @@ window.addEventListener("focus", () => {
   navigator.clipboard.contentsId().then((token) => {
     if (token !== lastToken) {
       // Clipboard contents have changed!
-      // Send to remote machine
+      // Display the "synchronize clipboard" button or "press ctrl+v" notification to the user,
+      // or just read the clipboard if you have the persistent clipboard permission.
     }
     lastToken = token;
   });
@@ -144,17 +166,16 @@ enable heuristics to make this invisible in most cases, but will not fix it comp
 
 ## Security & Privacy considerations
 
-This should be under the same restrictions as the `navigator.clipboard.read()`:
+This in of itself does not provide the website with any new substantial information about the user. The only potential
+danger is a new fingerprinting surface. To remediate this:
 
-- It should require `clipboard-read` permissions and request them on call.
-- It should be available only while the tab has focus.
+- This should be available only when the document is in focus (same as `navigator.clipboard.read()`).
+- The ID returned by this should be unique to the origin calling the method and change every time the site data for it
+  is deleted.
 
-Thus, it doesn’t expose any new not-available-before security-sensitive information. The only potential attack vector
-would be correlating different sessions with the same user based on the token, which provides a more precise way of
-ensuring across sessions that those to clipboards are in fact the same user. In practice however, this could be done by
-just re-reading the clipboard contents and comparing them, especially across changes \- which is possible already.
-Correlating users across sites by the origins that have clipboard permissions is already trivially easy and existence of
-this API does not change this state significantly.
+In this way, correlation of users cross-site should be impossible based on either the number itself or the exact timing
+of this number changing. Hence, this API should not provide any substantially new information to the site except a hint
+when to best call `read()` so that it's optimal and user-friendly.
 
 ## Alternatives
 
