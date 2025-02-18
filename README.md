@@ -172,9 +172,9 @@ danger is a new fingerprinting surface. To remediate this:
 - This should be available only when the document is in focus (same as `navigator.clipboard.read()`).
 - The ID returned by this should be unique to the origin calling the method and change every time the site data for it
   is deleted.
-- The returned value should equal `0`, be a completely random number, or overall be a rejected promise before the
-  document first successfully calls `read()` or `readText()` within a session (unless it already has a persistent
-  `clipboard-read` permission).
+- The returned promise should be rejected before the document first successfully calls `read()` or `readText()` within a
+  session. In particular, a browser that implements persistent clipboard permissions might just put this behind
+  `clipboard-read`.
 
 In this way, correlation of users cross-site should be impossible based on either the number itself or the exact timing
 of this number changing. Hence, this API should not provide any substantially new information to the site except a hint
