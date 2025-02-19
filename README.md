@@ -180,8 +180,8 @@ In this way, correlation of users cross-site should be impossible based on eithe
 of this number changing. Hence, this API should not provide any substantially new information to the site except a hint
 when to best call `read()` so that it's optimal and user-friendly.
 
-The last consideration will limit any attempts of using this outside of the intended use case. The driver behind this
-is - sites that do not read from the clipboard should never need to use this and doing so would probably be some attempt
+The last consideration will limit any attempts of using this outside of the intended use case. 
+Sites that do not read from the clipboard should never need to use this and doing so would probably be some attempt
 at abuse which user agent could mitigate.
 
 ## Alternatives
